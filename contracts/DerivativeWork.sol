@@ -17,14 +17,11 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
         address _derivativeCreator, uint256 _derivativeCreatorTokens
          ) ERC721(collectionName, collectionSymbol)  {
 
-        require(_originalCreatorTokens + _derivativeCreatorTokens < _maxSupply, "Not enough supply to mint creator and derivate creator tokens.");
+        require(_originalCreatorTokens + _derivativeCreatorTokens < _maxSupply, "Not enough supply to mint creator and derivate creator tokens.");        
         
         baseURI = _uri;
-
         originalCreator = _originalCreator;
-
         maxSupply = _maxSupply;
-
         mintPrice = _mintPrice;
 
         //first tokens get minted to the original creator
@@ -39,6 +36,9 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
 
     }
 
+    /**
+     * Gets the mint price for this derivative work
+     */
     function getPrice() external view returns (uint256){
         return mintPrice;
     }
@@ -61,14 +61,14 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
         uint256 supply = totalSupply();
         require(supply + amount <= maxSupply,      "Requested more than the amount of tokens remaining"); //enough supply left
         require(msg.value >= amount * mintPrice,   "Not enough ether sent"); //sent enough ether
-        
-
         for (uint256 i = 0; i < amount; i++){
             _safeMint(msg.sender, supply + i);
         }
-
     }
 
+    /**
+     * Allows the contract owner to withdraw the contract's entire value
+     */
     function withdrawAll() external onlyOwner {
         require(payable(msg.sender).send(address(this).balance)); //send value from contract to contract owner
     }
