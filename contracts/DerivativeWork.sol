@@ -12,7 +12,7 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
     uint256 mintPrice;
 
     constructor(string memory _uri, string memory collectionName, 
-        string memory collectionSymbol,  uint256 _maxSupply, uint256 _mintPrice, //ether
+        string memory collectionSymbol,  uint256 _maxSupply, uint256 _mintPrice, //wei
         address _originalCreator, uint256 _originalCreatorTokens,
         address _derivativeCreator, uint256 _derivativeCreatorTokens
          ) ERC721(collectionName, collectionSymbol)  {
