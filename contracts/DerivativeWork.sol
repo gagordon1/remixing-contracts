@@ -7,12 +7,12 @@ import 'openzeppelin-solidity/utils/math/SafeMath.sol';
 
 contract DerivativeWork is ERC721Enumerable, Ownable {
 
-    string baseTokenURI;
+    uint256 baseURI;
     address originalCreator;
     uint256 maxSupply;
     uint256 mintPrice;
 
-    constructor(string baseURI, string collectionName, 
+    constructor(string _baseURI, string collectionName, 
         string collectionSymbol,  uint256 _maxSupply, uint256 _mintPrice, //ether
         address  _originalCreator, uint256 _originalCreatorTokens,
         address _derivativeCreator, uint256 _derivativeCreatorTokens
@@ -20,11 +20,13 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
 
         require(add(_originalCreatorTokens, _derivativeCreatorTokens) < _maxSupply, "Not enough supply to mint creator and derivate creator tokens.");
         
-        setBaseURI(baseURI);
+        baseURI = _baseURI;
 
-        setOriginalCreator(_originalCreator);
+        originalCreator = _originalCreator;
 
-        setTotalSupply(_maxSupply);
+        maxSupply = _maxSupply;
+
+        mintPrice = _mintPrice;
 
         //first tokens get minted to the original creator
         for (uint256 i = 0; i < _originalCreatorTokens; i++){
@@ -34,31 +36,19 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
         for (uint256 j = _originalCreatorTokens; j < _originalCreatorTokens + _derivativeCreatorTokens; j++){
             _safeMint( _derivativeCreator, j);
         }
-    
-        setMintPrice(_mintPrice);
+        transferOwnership(_derivativeCreator); //derivative creator now owns the contract
 
     }
 
-    /**
-    Sets the mint price for the collection
-    */
-    function setMintPrice(uint256 _mintPrice) private internal{
-        mintPrice = _mintPrice ether;
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
 
     /**
      * Gets the original creator for this derivative work
      */
-    function getOriginalCreator() public{
+    function getOriginalCreator() external view returns (address memory) {
         return originalCreator;
-    }
-
-    function setOriginalCreator(address _originalCreator){
-        originalCreator = _originalCreator;
-    }
-
-    function setTotalSupply(uint256 _maxSupply){
-        maxSupply = _maxSupply;
     }
 
     /**
@@ -73,6 +63,10 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
             _safeMint(msg.sender, add(supply, i));
         };
 
+    }
+
+    function withdrawAll() external onlyOwner {
+        payable(msg.sender).send(address(this).balance); //send value from contract to contract owner
     }
 
 
