@@ -39,6 +39,10 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
 
     }
 
+    function getPrice() external view returns (uint256){
+        return mintPrice;
+    }
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -55,8 +59,9 @@ contract DerivativeWork is ERC721Enumerable, Ownable {
      */
     function buy(uint256 amount) external payable{
         uint256 supply = totalSupply();
-        require(msg.value >= amount * mintPrice); //sent enough ether
-        require(supply + amount < maxSupply); //enough supply left
+        require(supply + amount <= maxSupply,      "Requested more than the amount of tokens remaining"); //enough supply left
+        require(msg.value >= amount * mintPrice,   "Not enough ether sent"); //sent enough ether
+        
 
         for (uint256 i = 0; i < amount; i++){
             _safeMint(msg.sender, supply + i);
