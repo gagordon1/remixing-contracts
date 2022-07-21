@@ -14,18 +14,18 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
 		//TODO
 	}
 
-	function getRemixMap() external{
+	function getRemixMap() private view returns(mapping(address => uint256)){
 		//TODO
 	}
 
 
 
-	function getParent() public{
+	function getParent() public view returns (address){
 		//TODO
 	}
 
 
-	function getREP() public {
+	function getREP() public view returns (uint256) {
 		//TODO
 	}
 	

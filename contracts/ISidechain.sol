@@ -6,20 +6,21 @@
 interface ISidechain{
 
 	/**
-	 * Returns mapping showing contract owner address -> REP (will be recursive)
+	 * Returns mapping showing contract owner address => REP (will be recursive)
+	 * For use in constructor of a contract, allocating shares of the work
 	 */
-	function getRemixMap();
+	function getRemixMap() internal view returns(mapping(address => uint256));
 
 
 	/**
 	 * Gets the address of this contract's parent
 	 */
-	function getParent();
+	function getParent() external view returns (address);
 
 	
 	/**
 	 * Gets the REP of the contract
 	 */
-	function getREP();
+	function getREP() external view returns (uint256);
 	
 }
