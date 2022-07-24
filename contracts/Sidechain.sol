@@ -6,9 +6,9 @@ pragma solidity ^0.8.0;
  */
  contract Sidechain{
 
-   public address parent;
-   public uint256 REP;
-   private uint256 MAX_OWNERSHIP_VALUE = 1 000 000 //fractions are out of 1mil
+   address public parent;
+   uint256 public REP;
+   uint256 private MAX_OWNERSHIP_VALUE = 1000000; //fractions are out of 1mil
 
   /**
    * Given a parent address and the REP for the work, create the contract
@@ -18,7 +18,7 @@ pragma solidity ^0.8.0;
     REP = _REP;
     address[] memory ancestors = getAncestors();
     uint256 ancestorOwnership = getAncestorOwnership(ancestors);
-    require(ancestorOwnership + REP <= MAX_OWNERSHIP_VALUE); //make sure theres enough equity to create this work
+    require(ancestorOwnership + REP <= MAX_OWNERSHIP_VALUE); //make sure there is enough equity to create this work
   }
 
   /**
@@ -37,7 +37,7 @@ pragma solidity ^0.8.0;
    */
   function getAncestors() internal view returns (address[] memory){
     if(parent == 0){
-      return address[] emptyArray;
+      return address[];
     }
     address[] memory parentAncestors = parent.getAncestors();
     parentAncestors.push(parent);

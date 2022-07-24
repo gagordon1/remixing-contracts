@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
-MAX_OWNERSHIP_VALUE = 1 000 000 //equivalent to 100% ownership
+// MAX_OWNERSHIP_VALUE = 1 000 000 equivalent to 100% ownership
+// 
 /**
  * A compliant Sidechain token provides the wallet address and REP for each
  * prior derivative
