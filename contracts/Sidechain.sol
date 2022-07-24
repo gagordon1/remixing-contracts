@@ -8,7 +8,6 @@ pragma solidity ^0.8.0;
 
    public address parent;
    public uint256 REP;
-
    private uint256 MAX_OWNERSHIP_VALUE = 1 000 000 //fractions are out of 1mil
 
   /**
@@ -55,7 +54,6 @@ pragma solidity ^0.8.0;
   function getParent() public view returns (address){
   	return parent;
   }
-
 
   function getREP() public view returns (uint256) {
   	return REP;
