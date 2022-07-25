@@ -1,12 +1,17 @@
 pragma solidity ^0.8.0;
 
 // MAX_OWNERSHIP_VALUE = 1 000 000 equivalent to 100% ownership
-// 
+//
 /**
- * A compliant Sidechain token provides the wallet address and REP for each
+ * A compliant Sidechain token provides the wallet address and REV for each
  * prior derivative
  */
 interface ISidechain{
+
+	/**
+	 * Gets the wallet address of the creator
+	 */
+	function getCreator() external view returns (address);
 
 	/**
 	 * Gets the address of this contract's parent
@@ -16,9 +21,9 @@ interface ISidechain{
 
 
 	/**
-	 * Gets the REP of the contract (integer between 0 and MAX_OWNERSHIP_VALUE)
+	 * Gets the REV of the contract (integer between 0 and MAX_OWNERSHIP_VALUE)
 	 */
-	function getREP() external view returns (uint256);
+	function getREV() external view returns (uint16);
 
 	/**
 	 * When money is to be collected on copyright payment,

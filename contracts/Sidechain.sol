@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 pragma solidity ^0.8.0;
 
@@ -6,57 +8,32 @@ pragma solidity ^0.8.0;
  */
  contract Sidechain{
 
-   address public parent;
-   uint256 public REP;
-   uint256 private MAX_OWNERSHIP_VALUE = 1000000; //fractions are out of 1mil
+   address public creator;
+   address[] public parents;
+   uint16 public REV; // uint16 less than 1000
+   uint16 private MAX_OWNERSHIP_VALUE = 1000;
 
   /**
-   * Given a parent address and the REP for the work, create the contract
+   * Given a creator wallet address, parent contract address and the REV for
+   * the work, create the contract
    */
-   constructor(address _parent, uint256 _REP){
-  	parent = _parent;
-    REP = _REP;
-    address[] memory ancestors = getAncestors();
-    uint256 ancestorOwnership = getAncestorOwnership(ancestors);
-    require(ancestorOwnership + REP <= MAX_OWNERSHIP_VALUE); //make sure there is enough equity to create this work
+   constructor(address _creator, address[] memory _parents, uint16 _REV){
+    require(_REV <= MAX_OWNERSHIP_VALUE, "Maximum REV = 1000.");
+    parents = _parents;
+    REV = _REV;
+    creator = _creator;
   }
 
-  /**
-   * Returns the ownership attributable to a work's ancestors
-   */
-  function getAncestorOwnership(address[] memory ancestors) internal view returns (uint256){
-    uint256 ancestorOwnership = 0;
-    for (uint i = 0; i< ancestors.length; i++){
-      ancestorOwnership += getAncestorREP(ancestor[i]);
-    }
-    return ancestorOwnership;
+  function getCreator() public view returns (address){
+  	return creator;
   }
 
-  /**
-   * Gets ancestors of the contract
-   */
-  function getAncestors() internal view returns (address[] memory){
-    if(parent == 0){
-      return address[];
-    }
-    address[] memory parentAncestors = parent.getAncestors();
-    parentAncestors.push(parent);
-    return parentAncestors;
+  function getParents() public view returns (address[] memory){
+  	return parents;
   }
 
-  /**
-   * Given an ancestor's contract address, gets its REP
-   */
-  function getAncestorREP(address ancestor) internal view returns (uint256){
-    return ancestor.getREP();
-  }
-
-  function getParent() public view returns (address){
-  	return parent;
-  }
-
-  function getREP() public view returns (uint256) {
-  	return REP;
+  function getREV() public view returns (uint16) {
+  	return REV;
   }
 
   function collectCopyrightPayment() public payable{
