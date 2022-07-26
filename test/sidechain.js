@@ -4,9 +4,11 @@ const { toBN } = web3.utils;
 
 /**
 * Gets the lineage for a Sidechain leaf (walks up until roots)
+* 
+* returns Set(string)
 */
 const getLineage = async (node, contractFromAddress) =>{
-  let out = [await node.getCreator()]
+  let out = new Set([await node.getCreator()])
   const parents = await node.getParents();
   if (parents.length == 0){
     return out
@@ -14,8 +16,8 @@ const getLineage = async (node, contractFromAddress) =>{
   else{
 
     for (const parent of parents){
-      out = out.concat(await getLineage(contractFromAddress[parent],
-        contractFromAddress));
+      (await getLineage(contractFromAddress[parent], contractFromAddress))
+        .forEach((ancestor) => out.add(ancestor)) //ensure parents arent double counted
     }
     return out;
   }
@@ -47,8 +49,8 @@ contract("Sidechain", (accounts) => {
     for (node of [parent, child]){
       contractMap[node.address] = node;
     }
-    const ancestorSet = (await getLineage(child, contractMap)).sort().join();
-    const expectedSet = ([creators[0], creators[1]]).sort().join();
+    const ancestorSet = new Set(await getLineage(child, contractMap))
+    const expectedSet = new Set([creators[0], creators[1]])
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by ${creators[1]}`)
   });
 
@@ -73,12 +75,12 @@ contract("Sidechain", (accounts) => {
     }
 
     let ancestorSet = (await getLineage(n0, contractMap));
-    let expectedSet = ([creators[0]]);
+    let expectedSet = new Set([creators[0]]);
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 0`)
 
 
-    ancestorSet = (await getLineage(n6, contractMap)).sort().join().map(addr => creators.indexOf(addr));
-    expectedSet = ([creators[6], creators[0], creators[1], creators[2], creators[3]].sort().join());
+    ancestorSet = (await getLineage(n6, contractMap))
+    expectedSet = new Set([creators[0], creators[1], creators[2], creators[3], creators[6]]);
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 6`)
   });
 
