@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 /**
  * Implements the ISidechain interface
  */
- contract Sidechain{
+ contract Sidechain is ERC721Enumerable{
 
    address public creator;
    address[] public parents;

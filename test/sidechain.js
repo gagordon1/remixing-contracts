@@ -84,9 +84,13 @@ contract("Sidechain", (accounts) => {
     expectedSet = new Set([creators[0], creators[1], creators[2], creators[3], creators[6]]);
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 6`)
 
-    ancestorSet = (await getLineage(n6, contractMap))
-    expectedSet = new Set([creators[1], creators[4], creators[8]]);
-    assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 8`)
+    ancestorSet = (await getLineage(n9, contractMap))
+    expectedSet = new Set([creators[1], creators[4], creators[9], creators[8]]);
+    assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 9`)
+
+    ancestorSet = (await getLineage(n5, contractMap))
+    expectedSet = new Set([creators[5], creators[2], creators[0], creators[1]]);
+    assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 5`)
   });
 
 
