@@ -1,12 +1,14 @@
 pragma solidity ^0.8.0;
 
-// MAX_OWNERSHIP_VALUE = 1 000 000 equivalent to 100% ownership
+import 'openzeppelin-solidity/contracts/token/ERC721/extensions/IERC721Enumerable.sol';
+
+// MAX_OWNERSHIP_VALUE = 1 000 equivalent to 100% ownership
 //
 /**
  * A compliant Sidechain token provides the wallet address and REV for each
  * prior derivative
  */
-interface ISidechain{
+interface ISidechain is IERC721Enumerable{
 
 	/**
 	 * Gets the wallet address of the creator

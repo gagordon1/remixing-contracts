@@ -24,6 +24,19 @@ pragma solidity ^0.8.0;
     creator = _creator;
   }
 
+  function getAncestors() internal returns(address[] memory){
+    address[] memory out = [creator];
+    for (int i = 0; i< parents.length; i++){
+      out.push(parents[i]);
+      address[] memory ancestors = parents[i].getAncestors();
+      for (int j = 0; j < ancestors.length; j++){
+        out.push(ancestors[j])
+
+      }
+    }
+    return out;
+  }
+
   function getCreator() public view returns (address){
   	return creator;
   }
@@ -36,7 +49,7 @@ pragma solidity ^0.8.0;
   	return REV;
   }
 
-  function collectCopyrightPayment() public payable{
+  function collectCopyrightPayment() external payable{
   	//TODO
   }
 
