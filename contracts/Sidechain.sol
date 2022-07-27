@@ -1,20 +1,7 @@
 // SPDX-License-Identifier: MIT
-
-
 pragma solidity ^0.8.0;
 import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 
-// contract SidechainFactory{
-//   Sidechain[] private _sidechains;
-//
-//   function createSidechain(address[] memory parents, uint16 REV) public {
-//         Sidechain sidechain = new Sidechain(
-//             name,
-//             msg.sender
-//         );
-//         _sidechains.push(sidechain);
-//     }
-// }
 /**
  * Implements the ISidechain interface
  */
@@ -24,6 +11,7 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
    address[] public parents;
    uint16 public REV; // uint16 less than 1000
    uint16 private MAX_OWNERSHIP_VALUE = 1000;
+   address public factory; //factory that created this token
 
 
   /**
@@ -36,17 +24,34 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
     parents = _parents;
     REV = _REV;
     creator = _creator;
+    factory = msg.sender;
   }
 
-  function getCreator() public view returns (address){
+  /**
+   * To be called by a factory when it is minting the ancestor ownership
+   * tokens.
+   */
+  function factoryMint(address _to, uint256 _amount) external {
+    require(msg.sender == factory, "Only callable by creator of this contract.");
+    uint256 supply = totalSupply();
+    require(supply + _amount <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
+
+    for(uint256 i; i < _amount; i++){
+        _safeMint( _to, supply + i );
+    }
+  }
+
+
+
+  function getCreator() external view returns (address){
   	return creator;
   }
 
-  function getParents() public view returns (address[] memory){
+  function getParents() external view returns (address[] memory){
   	return parents;
   }
 
-  function getREV() public view returns (uint16) {
+  function getREV() external view returns (uint16) {
   	return REV;
   }
 

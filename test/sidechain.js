@@ -93,15 +93,4 @@ contract("Sidechain", (accounts) => {
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 5`)
   });
 
-
-  /**
-   * Constructs the contract asserting that:
-   *    - Create a network of Sidechain contracts but bigger.
-   * */
-  it("gets ancestors on chain using SidechainFactory.", async () =>{
-
-  });
-
-
-
 });
