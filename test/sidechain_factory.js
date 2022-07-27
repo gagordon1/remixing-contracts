@@ -26,7 +26,8 @@ async function createNetwork(network, factory, creators){
     let parents = sidechainData[1].map(index => addressMap[index])
     let result = await factory.createSidechain(parents, sidechainData[2],
       {from : creators[sidechainData[0]]})
-    let newAddress = result.logs[0].args.newAddress
+    let newAddress = result.logs[1].args.newAddress
+    let ancestors = result.logs[0].args.ancestors
     addressMap[sidechainData[0]] = newAddress
   }
   return addressMap
@@ -40,7 +41,7 @@ contract("SidechainFactory", (accounts) => {
   it("constructs a sidechain factory and can deploy a Sidechain contract", async () =>{
     const factory = await SidechainFactory.new();
     const result = await factory.createSidechain([], 200, {from : creators[0]})
-    const newAddress = result.logs[0].args.newAddress
+    const newAddress = result.logs[1].args.newAddress
     let deployed = await Sidechain.at(newAddress)
     assert.equal(await deployed.getCreator(), creators[0])
   });

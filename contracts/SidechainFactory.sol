@@ -6,6 +6,9 @@ contract SidechainFactory{
   mapping(address => bool) private _sidechains; //check if contract is a sidechain
   event SidechainCreated(address newAddress);
 
+  event LoadedAncestors(address[] ancestors);
+
+
   address[] private ancestors;
   uint16 public MAX_OWNERSHIP_VALUE = 1000;
 
@@ -16,6 +19,7 @@ contract SidechainFactory{
 
     delete ancestors; //clear array
     loadAncestors(parents);
+    emit LoadedAncestors(ancestors);
 
     //check that there is available equity
     uint16 ancestorOwnership = 0;
@@ -24,23 +28,23 @@ contract SidechainFactory{
       ancestorOwnership +=  Sidechain(ancestor).getREV();
     }
     require(ancestorOwnership + REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
-
-    //create new sidechain contract
+    // emit CheckedAncestorOwnership();
+    // //create new sidechain contract
     Sidechain sidechain = new Sidechain(
         msg.sender,
         parents,
         REV
     );
-    _sidechains[address(sidechain)] = true;
-
-    //mint ancestor ownership to each
-    for (uint i = 0; i<ancestors.length;i++){
-      address ancestor = ancestors[i];
-      sidechain.factoryMint(Sidechain(ancestor).getCreator(), Sidechain(ancestor).getREV());
-    }
+    // _sidechains[address(sidechain)] = true;
+    //
+    // //mint ancestor ownership to each
+    // for (uint i = 0; i<ancestors.length;i++){
+    //   address ancestor = ancestors[i];
+    //   sidechain.factoryMint(Sidechain(ancestor).getCreator(), Sidechain(ancestor).getREV());
+    //}
 
     //mint REV amount of tokens to creator of this work
-    sidechain.factoryMint(msg.sender, REV);
+    // sidechain.factoryMint(msg.sender, REV);
 
     emit SidechainCreated(address(sidechain));
   }
