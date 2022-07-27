@@ -5,7 +5,7 @@
  * them to suit your project as necessary.
  *
  * More information about configuration can be found at:
- * 
+ *
  * https://trufflesuite.com/docs/truffle/reference/configuration
  *
  * To deploy via Infura you'll need a wallet provider (like @truffle/hdwallet-provider)
@@ -44,9 +44,9 @@ module.exports = {
       network_id: "*", // Match any network ID
       host: "localhost",
       port: 8545,
-    }
+    },
     // development: {
-    //  host: "127.0.0.1",     // Localhost (default: none)
+    //  host: "localhost",     // Localhost (default: none)
     //  port: 8545,            // Standard Ethereum port (default: none)
     //  network_id: "*",       // Any network (default: none)
     // },
