@@ -5,6 +5,6 @@ const parent1 = ["0x0000000000000000000000000000000000000000"];
 const rev1 = 200;
 
 //Deploy chain of derivative works
-module.exports = function (deployer) {
-  deployer.deploy(Sidechain, creator1, parent1, rev1)
+module.exports = async function (deployer) {
+  deployer.deploy(Sidechain, creator1, parent1, rev1);
 };

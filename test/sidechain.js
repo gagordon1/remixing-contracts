@@ -94,5 +94,33 @@ contract("Sidechain", (accounts) => {
   });
 
 
+  /**
+   * Constructs the contract asserting that:
+   *    - Create a network of Sidechain contracts but bigger.
+   * */
+  it("gets ancestors on chain.", async () =>{
+    const contractMap = {}
+    var n0 = await Sidechain.new(creators[0],[], 200);
+    var n1 = await Sidechain.new(creators[1],[], 200);
+    var n2 = await Sidechain.new(creators[2],[n0.address,n1.address], 300);
+    var n3 = await Sidechain.new(creators[3],[n1.address], 200);
+    var n4 = await Sidechain.new(creators[4],[n1.address], 200);
+    var n5 = await Sidechain.new(creators[5],[n2.address], 200);
+    var n6 = await Sidechain.new(creators[6],[n2.address,n3.address], 200);
+    var n7 = await Sidechain.new(creators[7],[n3.address], 200);
+    var n8 = await Sidechain.new(creators[8],[n4.address], 400);
+    var n9 = await Sidechain.new(creators[9],[n8.address], 200);
+    
+    for (node of [n0,n1,n2,n3,n4,n5,n6,n7,n8,n9]){
+      contractMap[node.address] = node;
+    }
+
+    let ancestorSet = await debug(n0.getAncestors());
+    console.log(ancestorSet)
+    let expectedSet = new Set([creators[0]]);
+    
+  });
+
+
 
 });

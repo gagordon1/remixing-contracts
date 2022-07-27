@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
-pragma solidity ^0.8.0;
 
+pragma solidity ^0.8.0;
+import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 /**
  * Implements the ISidechain interface
  */
@@ -12,29 +12,40 @@ pragma solidity ^0.8.0;
    address[] public parents;
    uint16 public REV; // uint16 less than 1000
    uint16 private MAX_OWNERSHIP_VALUE = 1000;
+   address[] public ancestors = new address[](0);
 
   /**
    * Given a creator wallet address, parent contract address and the REV for
    * the work, create the contract
    */
-   constructor(address _creator, address[] memory _parents, uint16 _REV){
+   constructor(address _creator, address[] memory _parents, uint16 _REV) 
+    ERC721("Sidechain", "SDCN"){
     require(_REV <= MAX_OWNERSHIP_VALUE, "Maximum REV = 1000.");
     parents = _parents;
     REV = _REV;
     creator = _creator;
+    loadAncestors();
   }
 
-  function getAncestors() internal returns(address[] memory){
-    address[] memory out = [creator];
-    for (int i = 0; i< parents.length; i++){
-      out.push(parents[i]);
-      address[] memory ancestors = parents[i].getAncestors();
-      for (int j = 0; j < ancestors.length; j++){
-        out.push(ancestors[j])
+  /**
+   * Gets all ancestors for a node, including itself.
+   */
+  function loadAncestors() private{
+    ancestors.push(creator);
+    if (parents.length > 0){
+      for (uint16 i = 0; i< parents.length; i++){
+        address[] memory parentAncestors = Sidechain(parents[i]).getAncestors();
+        for (uint16 j = 0; j < parentAncestors.length; j++){
+          ancestors.push(parentAncestors[j]);
 
-      }
+        }
     }
-    return out;
+    }
+    
+  }
+
+  function getAncestors() public view returns (address[] memory){
+    return ancestors;
   }
 
   function getCreator() public view returns (address){
