@@ -61,9 +61,9 @@ contract("Sidechain", (accounts) => {
   it("constructs a remix tree correctly 2", async () =>{
     const contractMap = {}
     var n0 = await Sidechain.new(creators[0],[], 200);
-    var n1 = await Sidechain.new(creators[1],[], 200);
+    var n1 = await Sidechain.new(creators[1],[], 100);
     var n2 = await Sidechain.new(creators[2],[n0.address,n1.address], 300);
-    var n3 = await Sidechain.new(creators[3],[n1.address], 200);
+    var n3 = await Sidechain.new(creators[3],[n1.address], 100);
     var n4 = await Sidechain.new(creators[4],[n1.address], 200);
     var n5 = await Sidechain.new(creators[5],[n2.address], 200);
     var n6 = await Sidechain.new(creators[6],[n2.address,n3.address], 200);
@@ -92,5 +92,32 @@ contract("Sidechain", (accounts) => {
     expectedSet = new Set([creators[5], creators[2], creators[0], creators[1]]);
     assert.deepEqual(ancestorSet, expectedSet, `Lineage incorrect for work created by creator 5`)
   });
+
+  /**
+   * Constructs the contract asserting that:
+   *    - Allocation of ownership is done correctly upon construction.
+   * */
+   it("allocates ownership properly", async () =>{
+    const contractMap = {}
+    var n0 = await Sidechain.new(creators[0],[], 200);
+    var n1 = await Sidechain.new(creators[1],[], 100);
+    var n2 = await Sidechain.new(creators[2],[n0.address,n1.address], 300);
+    var n3 = await Sidechain.new(creators[3],[n1.address], 100);
+    var n4 = await Sidechain.new(creators[4],[n1.address], 200);
+    var n5 = await Sidechain.new(creators[5],[n2.address], 200);
+    var n6 = await Sidechain.new(creators[6],[n2.address,n3.address], 200);
+    var n7 = await Sidechain.new(creators[7],[n3.address], 200);
+    var n8 = await Sidechain.new(creators[8],[n4.address], 400);
+    var n9 = await Sidechain.new(creators[9],[n8.address], 200);
+
+    for (node of [n0,n1,n2,n3,n4,n5,n6,n7,n8,n9]){
+      contractMap[node.address] = node;
+    }
+
+    assert.equal(n9.balanceOf(creators[2]), 300)
+  });
+
+
+  
 
 });

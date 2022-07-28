@@ -4,60 +4,64 @@ import './Sidechain.sol';
 
 contract SidechainFactory{
   mapping(address => bool) private _sidechains; //check if contract is a sidechain
+  uint256 ancestorIndex = 0;
+  
   event SidechainCreated(address newAddress);
-
   event LoadedAncestors(address[] ancestors);
 
-
-  address[] private ancestors;
   uint16 public MAX_OWNERSHIP_VALUE = 1000;
 
   /**
    * Creates a sidechain and adds it to our global set of sidechains.
    */
   function createSidechain(address[] memory parents, uint16 REV) external{
-
-    delete ancestors; //clear array
-    loadAncestors(parents);
+    ancestorIndex = 0;
+    address[] memory ancestors = new address[](MAX_OWNERSHIP_VALUE); //token could conceivably have 1000 ancestors.
+    
+    loadAncestors(ancestors, parents);
     emit LoadedAncestors(ancestors);
 
     //check that there is available equity
     uint16 ancestorOwnership = 0;
-    for (uint i = 0; i<ancestors.length;i++){
+    for (uint i = 0; i< ancestorIndex;i++){
       address ancestor = ancestors[i];
       ancestorOwnership +=  Sidechain(ancestor).getREV();
     }
     require(ancestorOwnership + REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
-    // emit CheckedAncestorOwnership();
-    // //create new sidechain contract
+    
+    //create new sidechain contract
     Sidechain sidechain = new Sidechain(
         msg.sender,
         parents,
         REV
     );
-    // _sidechains[address(sidechain)] = true;
-    //
-    // //mint ancestor ownership to each
-    // for (uint i = 0; i<ancestors.length;i++){
-    //   address ancestor = ancestors[i];
-    //   sidechain.factoryMint(Sidechain(ancestor).getCreator(), Sidechain(ancestor).getREV());
-    //}
+    _sidechains[address(sidechain)] = true;
+    
+    //mint ancestor ownership to each
+    for (uint i = 0; i<ancestorIndex;i++){
+      address ancestor = ancestors[i];
+      sidechain.factoryMint(Sidechain(ancestor).getCreator(), Sidechain(ancestor).getREV());
+    }
 
     //mint REV amount of tokens to creator of this work
     // sidechain.factoryMint(msg.sender, REV);
 
     emit SidechainCreated(address(sidechain));
+    ancestorIndex = 0;
   }
 
   /**
-   * loads ancestor contracts into factory storage
+   * loads ancestor contracts into ancestor array
    */
-  function loadAncestors(address[] memory parents) internal{
+  function loadAncestors(address[] memory ancestors, address[] memory parents) internal{
     for (uint i = 0; i < parents.length; i++){
       address parent = parents[i];
-      ancestors.push(parent);
-      loadAncestors(Sidechain(parent).getParents());
+      ancestors[ancestorIndex] = parent;
+      ancestorIndex++;
+      loadAncestors(ancestors, Sidechain(parent).getParents());
     }
   }
 
 }
+
+
