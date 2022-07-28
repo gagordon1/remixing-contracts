@@ -7,11 +7,14 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
  */
  contract Sidechain is ERC721Enumerable{
 
+  event SidechainCreated(address newAddress);
+  event LoadedAncestors(address[] ancestors);
+
    address public creator;
    address[] public parents;
    uint16 public REV; // uint16 less than 1000
    uint16 private MAX_OWNERSHIP_VALUE = 1000;
-   address public factory; //factory that created this token
+   uint16 ancestorCount = 0;
 
 
   /**
@@ -24,15 +27,17 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
     parents = _parents;
     REV = _REV;
     creator = _creator;
-    factory = msg.sender;
+    
+    address[] memory ancestors = new address[](MAX_OWNERSHIP_VALUE);
+    loadAncestors(ancestors, parents);
+    emit LoadedAncestors(ancestors);
+
   }
 
   /**
-   * To be called by a factory when it is minting the ancestor ownership
-   * tokens.
+   * To be called when minting the ancestor ownership tokens.
    */
-  function factoryMint(address _to, uint256 _amount) external {
-    require(msg.sender == factory, "Only callable by creator of this contract.");
+  function factoryMint(address _to, uint256 _amount) private {
     uint256 supply = totalSupply();
     require(supply + _amount <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
 
@@ -40,8 +45,6 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
         _safeMint( _to, supply + i );
     }
   }
-
-
 
   function getCreator() external view returns (address){
   	return creator;
@@ -57,6 +60,18 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
 
   function collectCopyrightPayment() external payable{
   	//TODO
+  }
+
+   /**
+   * loads ancestor contracts into an ancestor array
+   */
+  function loadAncestors(address[] memory ancestors, address[] memory parents) private{
+    for (uint i = 0; i < parents.length; i++){
+      address parent = parents[i];
+      ancestors[ancestorCount] = parent;
+      ancestorCount++;
+      loadAncestors(ancestors, Sidechain(parent).getParents());
+    }
   }
 
 }
