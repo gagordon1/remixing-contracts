@@ -8,7 +8,8 @@ module.exports = {
         accounts: {
             count: 10
         },
-        gas : 6721975 
+        blockGasLimit: 100000000429720 
     }
+    
   }
 };

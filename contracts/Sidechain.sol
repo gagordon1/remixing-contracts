@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
+import "hardhat/console.sol";
 
 /**
  * Implements the ISidechain interface
@@ -8,11 +9,6 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
  contract Sidechain is ERC721Enumerable{
 
   event SidechainCreated(address newAddress);
-  event LoadedAncestors(address[] ancestors, uint16 count);
-  event AllocatedTokens(uint16 amount, address to);
-  event AncestorEquity(uint16 value);
-  event Looping(address ancestorCreator, uint16 ancestorREV);
-
 
   address public creator;
   address[] public parents;
@@ -32,26 +28,32 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
     REV = _REV;
     creator = _creator;
     
-    address[] memory ancestors = new address[](10);
+    address[] memory ancestors = new address[](MAX_OWNERSHIP_VALUE); //largest size the array could conceivably be
     loadAncestors(ancestors, _parents);
-    emit LoadedAncestors(ancestors, ancestorCount);
 
     //check for sufficient equity to mint ownership tokens.
     require(getAncestorEquity(ancestors) + _REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
-
-    emit AncestorEquity(getAncestorEquity(ancestors));
     
     //mint tokens to all ancestors
+    console.log("-------");
+    uint256 supply;
     for (uint16 i = 0; i< ancestorCount; i++){
       address ancestor = ancestors[i];
-      address ancestorCreator = Sidechain(ancestor).getCreator();
-      uint16 ancestorREV = Sidechain(ancestor).getREV();
-      emit Looping(ancestorCreator, ancestorREV);
-      uint256 supply = totalSupply();
-      for(uint16 j; j < ancestorREV; j++){
-          _safeMint( ancestorCreator, supply + j );
+      supply = totalSupply();
+      
+      for(uint16 j; j < Sidechain(ancestor).getREV(); j++){
+          _safeMint( Sidechain(ancestor).getCreator(), supply + j );
       }
+      console.log(Sidechain(ancestor).getCreator());
+      console.log(balanceOf(Sidechain(ancestor).getCreator()));
     }
+    
+    supply = totalSupply();
+    //mint remaining equity to creator
+    for(uint16 j; j < MAX_OWNERSHIP_VALUE - supply; j++){
+          _safeMint( _creator, supply + j );
+      }
+    emit SidechainCreated(address(this));
   }
 
   function getCreator() external view returns (address){
