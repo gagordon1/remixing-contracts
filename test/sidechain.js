@@ -139,23 +139,18 @@ describe.only("Sidechain", async (accounts) => {
 
     assert.equal(await n2.balanceOf(creators[0]), 200, "Incorrect ownership.")
     assert.equal(await n2.balanceOf(creators[1]), 100, "Incorrect ownership.")
-    assert.equal(await n2.balanceOf(creators[2]), 700, "Incorrect ownership.")
 
     assert.equal(await n7.balanceOf(creators[1]), 100, "Incorrect ownership.")
     assert.equal(await n7.balanceOf(creators[3]), 100, "Incorrect ownership.")
-    assert.equal(await n7.balanceOf(creators[7]), 800, "Incorrect ownership.")
 
     assert.equal(await n9.balanceOf(creators[1]), 100, "Incorrect ownership.")
     assert.equal(await n9.balanceOf(creators[4]), 200, "Incorrect ownership.")
     assert.equal(await n9.balanceOf(creators[8]), 400, "Incorrect ownership.")
-    assert.equal(await n9.balanceOf(creators[3]), 100, "Incorrect ownership.")
-    assert.equal(await n9.balanceOf(creators[9]), 200, "Incorrect ownership.")
 
     assert.equal(await n6.balanceOf(creators[1]), 200, "Incorrect ownership.")
     assert.equal(await n6.balanceOf(creators[3]), 100, "Incorrect ownership.")
     assert.equal(await n6.balanceOf(creators[2]), 300, "Incorrect ownership.")
     assert.equal(await n6.balanceOf(creators[0]), 200, "Incorrect ownership.")
-    assert.equal(await n6.balanceOf(creators[6]), 200, "Incorrect ownership.")
 
   }).timeout(100000);
 

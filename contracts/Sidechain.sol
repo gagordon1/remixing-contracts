@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
-import "hardhat/console.sol";
 
 /**
  * Implements the ISidechain interface
@@ -35,7 +34,6 @@ import "hardhat/console.sol";
     require(getAncestorEquity(ancestors) + _REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
     
     //mint tokens to all ancestors
-    console.log("-------");
     uint256 supply;
     for (uint16 i = 0; i< ancestorCount; i++){
       address ancestor = ancestors[i];
@@ -44,15 +42,14 @@ import "hardhat/console.sol";
       for(uint16 j; j < Sidechain(ancestor).getREV(); j++){
           _safeMint( Sidechain(ancestor).getCreator(), supply + j );
       }
-      console.log(Sidechain(ancestor).getCreator());
-      console.log(balanceOf(Sidechain(ancestor).getCreator()));
     }
     
     supply = totalSupply();
     //mint remaining equity to creator
-    for(uint16 j; j < MAX_OWNERSHIP_VALUE - supply; j++){
-          _safeMint( _creator, supply + j );
-      }
+    // for(uint16 j; j < MAX_OWNERSHIP_VALUE - supply; j++){
+    //       _safeMint( _creator, supply + j );
+    //   }
+    // this is too slow I think we need to switch to ERC20
     emit SidechainCreated(address(this));
   }
 
