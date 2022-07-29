@@ -24,7 +24,26 @@ const getLineage = async (node, contractFromAddress) =>{
 }
 
 contract("Sidechain", (accounts) => {
+
+//   Sidechain.defaults({
+//     gasPrice: 0,
+// })
+
+  const accountsDevelopMode = [
+    "0x468452829705ace2579fef3fae59333ac33b1ca8",
+    "0x557c65e243092e4142d30331732b89f9f69b1074",
+    "0x3825df80a86114730c2f46ffd9dcbcf5d013a76a",
+    "0x6fc72b42ee2e3ddcdf61b15c357a7dd92a5c53f3",
+    "0x7c7b263f15c3f87081b7a0588a87559cbc6bd0cb",
+    "0x54676b75b0435993bd88d2b5051f64998c9968f1",
+    "0xa68d06a6e0562a09b525549381132ab6099b9af2",
+    "0x851d2896f15b67e3a5d548e413727531d0b34904",
+    "0x3540f684c324a644fb3788eaffcd4219f375b039",
+    "0x4937a29020871be426887ab49c96af0e1b91f53"
+  ]
   const creators = accounts;
+
+
   it("constructs the contract correctly", async () =>{
     var instance = await Sidechain.new(creators[0],[], 1000);
     var parents = await instance.getParents();
@@ -44,7 +63,7 @@ contract("Sidechain", (accounts) => {
    * */
   it("constructs a remix tree correctly 1", async () =>{
     var parent = await Sidechain.new(creators[0],[], 200);
-    var child = await Sidechain.new(creators[1],[parent.address], 300);
+    var child = await Sidechain.new(creators[1],[parent.address], 300, { gas: 5000000 });
     const contractMap = {}
     for (node of [parent, child]){
       contractMap[node.address] = node;

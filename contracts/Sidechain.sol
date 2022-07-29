@@ -11,12 +11,14 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
   event LoadedAncestors(address[] ancestors, uint16 count);
   event AllocatedTokens(uint16 amount, address to);
   event AncestorEquity(uint16 value);
+  event Looping(address ancestorCreator, uint16 ancestorREV);
 
-   address public creator;
-   address[] public parents;
-   uint16 public REV; // uint16 less than 1000
-   uint16 private MAX_OWNERSHIP_VALUE = 1000;
-   uint16 ancestorCount = 0;
+
+  address public creator;
+  address[] public parents;
+  uint16 public REV; // uint16 less than 1000
+  uint16 private MAX_OWNERSHIP_VALUE = 1000;
+  uint16 ancestorCount = 0;
 
 
   /**
@@ -38,12 +40,19 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
     require(getAncestorEquity(ancestors) + _REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
 
     emit AncestorEquity(getAncestorEquity(ancestors));
+    
     //mint tokens to all ancestors
-    // ancestorMint(ancestors);
-    // batchMint(_creator, _REV);
+    for (uint16 i = 0; i< ancestorCount; i++){
+      address ancestor = ancestors[i];
+      address ancestorCreator = Sidechain(ancestor).getCreator();
+      uint16 ancestorREV = Sidechain(ancestor).getREV();
+      emit Looping(ancestorCreator, ancestorREV);
+      uint256 supply = totalSupply();
+      for(uint16 j; j < ancestorREV; j++){
+          _safeMint( ancestorCreator, supply + j );
+      }
+    }
   }
-
-
 
   function getCreator() external view returns (address){
   	return creator;
@@ -80,28 +89,6 @@ import 'openzeppelin-solidity/contracts/token/ERC721/extensions/ERC721Enumerable
       ancestorEquity +=  Sidechain(ancestor).getREV();
     }
     return ancestorEquity;
-  }
-
-  /**
-    Gets total supply of the tokens and mints the next {amount} token ids
-    to the specified address
-   */
-  function batchMint(address _to, uint16 _amount) private{
-    uint256 supply = totalSupply();
-    for(uint256 tokenId = supply; tokenId < supply + _amount; tokenId++){
-      _safeMint(_to, tokenId);
-      emit AllocatedTokens(_amount, _to);
-    }
-  }
-
-  /**
-   * To be called when minting the ancestor ownership tokens.
-   */
-  function ancestorMint(address[] memory ancestors) private {
-    for (uint16 i = 0; i< ancestorCount; i++){
-      address ancestor = ancestors[i];
-      batchMint(Sidechain(ancestor).getCreator(), Sidechain(ancestor).getREV());
-    }
   }
 
 }
