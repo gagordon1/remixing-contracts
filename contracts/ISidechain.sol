@@ -1,6 +1,8 @@
+
+
 pragma solidity ^0.8.0;
 
-import 'openzeppelin-solidity/contracts/token/ERC721/extensions/IERC721Enumerable.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol';
 
 // MAX_OWNERSHIP_VALUE = 1 000 equivalent to 100% ownership
 //

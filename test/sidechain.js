@@ -1,6 +1,12 @@
-const Sidechain = artifacts.require("Sidechain");
-const truffleAssert = require('truffle-assertions');
-const { toBN } = web3.utils;
+const {
+    time,
+    loadFixture,
+  } = require("@nomicfoundation/hardhat-network-helpers");
+
+const { expect } = require("chai");
+const w3 = require("web3")
+const { toBN } = w3.utils;
+var assert = require('assert');
 
 /**
 * Gets the lineage for a Sidechain leaf (walks up until roots)
@@ -23,29 +29,23 @@ const getLineage = async (node, contractFromAddress) =>{
   }
 }
 
-contract("Sidechain", (accounts) => {
+describe.only("Sidechain", async (accounts) => {
 
-//   Sidechain.defaults({
-//     gasPrice: 0,
-// })
+    async function deployTokenFixture() {
+        // Get the ContractFactory and Signers here.
+        const Sidechain = await ethers.getContractFactory("Sidechain");
+        const creators = (await ethers.getSigners()).map(signer => signer.address);;
+    
+        // Fixtures can return anything you consider useful for your tests
+        return { Sidechain, creators };
+      }
+ 
 
-  const accountsDevelopMode = [
-    "0x468452829705ace2579fef3fae59333ac33b1ca8",
-    "0x557c65e243092e4142d30331732b89f9f69b1074",
-    "0x3825df80a86114730c2f46ffd9dcbcf5d013a76a",
-    "0x6fc72b42ee2e3ddcdf61b15c357a7dd92a5c53f3",
-    "0x7c7b263f15c3f87081b7a0588a87559cbc6bd0cb",
-    "0x54676b75b0435993bd88d2b5051f64998c9968f1",
-    "0xa68d06a6e0562a09b525549381132ab6099b9af2",
-    "0x851d2896f15b67e3a5d548e413727531d0b34904",
-    "0x3540f684c324a644fb3788eaffcd4219f375b039",
-    "0x4937a29020871be426887ab49c96af0e1b91f53"
-  ]
-  const creators = accounts;
-
-
+  console.log("here")
   it("constructs the contract correctly", async () =>{
-    var instance = await Sidechain.new(creators[0],[], 1000);
+    const { Sidechain, creators } = await loadFixture(deployTokenFixture)
+    var instance = await Sidechain.deploy(creators[0],[], 1000);
+    await instance.deployed()
     var parents = await instance.getParents();
     var rev = await instance.getREV();
     var creator = await instance.getCreator();
@@ -53,8 +53,9 @@ contract("Sidechain", (accounts) => {
     assert.equal(rev, 1000,             "Constructor incorrectly sets remix equity value.");
     assert.equal(creator, creators[0],  "Constructor incorrectly sets creator.");
 
-    await truffleAssert.reverts(Sidechain.new(creators[0],[], 1001),
-      "Maximum REV = 1000.");
+    await expect (
+        Sidechain.deploy(creators[0],[], 1001)
+      ).to.be.revertedWith("Maximum REV = 1000.");
   });
 
   /**
@@ -62,8 +63,9 @@ contract("Sidechain", (accounts) => {
    *    - Create a network of Sidechain contracts.
    * */
   it("constructs a remix tree correctly 1", async () =>{
-    var parent = await Sidechain.new(creators[0],[], 200);
-    var child = await Sidechain.new(creators[1],[parent.address], 300, { gas: 5000000 });
+    const { Sidechain, creators } = await loadFixture(deployTokenFixture)
+    var parent = await Sidechain.deploy(creators[0],[], 200);
+    var child = await Sidechain.deploy(creators[1],[parent.address], 300);
     const contractMap = {}
     for (node of [parent, child]){
       contractMap[node.address] = node;
@@ -78,17 +80,18 @@ contract("Sidechain", (accounts) => {
    *    - Create a network of Sidechain contracts but bigger.
    * */
   it("constructs a remix tree correctly 2", async () =>{
+    const { Sidechain, creators } = await loadFixture(deployTokenFixture)
     const contractMap = {}
-    var n0 = await Sidechain.new(creators[0],[], 200);
-    var n1 = await Sidechain.new(creators[1],[], 100);
-    var n2 = await Sidechain.new(creators[2],[n0.address,n1.address], 300);
-    var n3 = await Sidechain.new(creators[3],[n1.address], 100);
-    var n4 = await Sidechain.new(creators[4],[n1.address], 200);
-    var n5 = await Sidechain.new(creators[5],[n2.address], 200);
-    var n6 = await Sidechain.new(creators[6],[n2.address,n3.address], 200);
-    var n7 = await Sidechain.new(creators[7],[n3.address], 200);
-    var n8 = await Sidechain.new(creators[8],[n4.address], 400);
-    var n9 = await Sidechain.new(creators[9],[n8.address], 200);
+    var n0 = await Sidechain.deploy(creators[0],[], 200);
+    var n1 = await Sidechain.deploy(creators[1],[], 100);
+    var n2 = await Sidechain.deploy(creators[2],[n0.address,n1.address], 300);
+    var n3 = await Sidechain.deploy(creators[3],[n1.address], 100);
+    var n4 = await Sidechain.deploy(creators[4],[n1.address], 200);
+    var n5 = await Sidechain.deploy(creators[5],[n2.address], 200);
+    var n6 = await Sidechain.deploy(creators[6],[n2.address,n3.address], 200);
+    var n7 = await Sidechain.deploy(creators[7],[n3.address], 200);
+    var n8 = await Sidechain.deploy(creators[8],[n4.address], 400);
+    var n9 = await Sidechain.deploy(creators[9],[n8.address], 200);
 
     for (node of [n0,n1,n2,n3,n4,n5,n6,n7,n8,n9]){
       contractMap[node.address] = node;
@@ -117,26 +120,24 @@ contract("Sidechain", (accounts) => {
    *    - Allocation of ownership is done correctly upon construction.
    * */
    it("allocates ownership properly", async () =>{
+    const { Sidechain, creators } = await loadFixture(deployTokenFixture)
     const contractMap = {}
-    var n0 = await Sidechain.new(creators[0],[], 200);
-    var n1 = await Sidechain.new(creators[1],[], 100);
-    var n2 = await Sidechain.new(creators[2],[n0.address,n1.address], 300);
-    var n3 = await Sidechain.new(creators[3],[n1.address], 100);
-    var n4 = await Sidechain.new(creators[4],[n1.address], 200);
-    var n5 = await Sidechain.new(creators[5],[n2.address], 200);
-    var n6 = await Sidechain.new(creators[6],[n2.address,n3.address], 200);
-    var n7 = await Sidechain.new(creators[7],[n3.address], 200);
-    var n8 = await Sidechain.new(creators[8],[n4.address], 400);
-    var n9 = await Sidechain.new(creators[9],[n8.address], 200);
+    var n0 = await Sidechain.deploy(creators[0],[], 200);
+    var n1 = await Sidechain.deploy(creators[1],[], 100);
+    var n2 = await Sidechain.deploy(creators[2],[n0.address,n1.address], 300);
+    var n3 = await Sidechain.deploy(creators[3],[n1.address], 100);
+    var n4 = await Sidechain.deploy(creators[4],[n1.address], 200);
+    var n5 = await Sidechain.deploy(creators[5],[n2.address], 200);
+    var n6 = await Sidechain.deploy(creators[6],[n2.address,n3.address], 200);
+    var n7 = await Sidechain.deploy(creators[7],[n3.address], 200);
+    var n8 = await Sidechain.deploy(creators[8],[n4.address], 400);
+    var n9 = await Sidechain.deploy(creators[9],[n8.address], 200);
 
     for (node of [n0,n1,n2,n3,n4,n5,n6,n7,n8,n9]){
       contractMap[node.address] = node;
     }
 
-    assert.equal(n9.balanceOf(creators[2]), 300)
+    assert.equal(await n9.balanceOf(creators[2]), 300)
   });
-
-
-  
 
 });
