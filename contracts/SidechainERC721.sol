@@ -5,14 +5,14 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 /**
  * Implements the ISidechain interface
  */
- contract Sidechain is ERC721Enumerable{
+ contract SidechainERC721 is ERC721Enumerable{
 
   event SidechainCreated(address newAddress);
 
   address public creator;
   address[] public parents;
-  uint16 public REV; // uint16 less than 1000
-  uint16 private MAX_OWNERSHIP_VALUE = 1000;
+  uint16 public REV; // uint16 less than 100
+  uint16 private MAX_OWNERSHIP_VALUE = 100;
   uint16 ancestorCount = 0;
 
 
@@ -22,7 +22,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
    */
    constructor(address _creator, address[] memory _parents, uint16 _REV)
     ERC721("Sidechain", "SDCN"){
-    require(_REV <= MAX_OWNERSHIP_VALUE, "Maximum REV = 1000.");
+    require(_REV <= MAX_OWNERSHIP_VALUE, "Maximum REV = 100.");
     parents = _parents;
     REV = _REV;
     creator = _creator;
@@ -39,16 +39,16 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
       address ancestor = ancestors[i];
       supply = totalSupply();
       
-      for(uint16 j; j < Sidechain(ancestor).getREV(); j++){
-          _safeMint( Sidechain(ancestor).getCreator(), supply + j );
+      for(uint16 j; j < SidechainERC721(ancestor).getREV(); j++){
+          _safeMint( SidechainERC721(ancestor).getCreator(), supply + j );
       }
     }
     
     supply = totalSupply();
     //mint remaining equity to creator
-    // for(uint16 j; j < MAX_OWNERSHIP_VALUE - supply; j++){
-    //       _safeMint( _creator, supply + j );
-    //   }
+    for(uint16 j; j < MAX_OWNERSHIP_VALUE - supply; j++){
+          _safeMint( _creator, supply + j );
+      }
     // this is too slow I think we need to switch to ERC20
     emit SidechainCreated(address(this));
   }
@@ -77,7 +77,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
       address parent = _parents[i];
       ancestors[ancestorCount] = parent;
       ancestorCount++;
-      loadAncestors(ancestors, Sidechain(parent).getParents());
+      loadAncestors(ancestors, SidechainERC721(parent).getParents());
     }
   }
 
@@ -85,7 +85,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
     uint16 ancestorEquity = 0;
     for (uint16 i = 0; i< ancestorCount;i++){
       address ancestor = _ancestors[i];
-      ancestorEquity +=  Sidechain(ancestor).getREV();
+      ancestorEquity +=  SidechainERC721(ancestor).getREV();
     }
     return ancestorEquity;
   }
