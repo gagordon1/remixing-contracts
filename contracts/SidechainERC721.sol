@@ -3,7 +3,8 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 
 /**
- * Implements the ISidechain interface
+ * Implements the ISidechainERC721 interface
+ * Copyright management for high value audio
  */
  contract SidechainERC721 is ERC721Enumerable{
 
@@ -65,8 +66,12 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
   	return REV;
   }
 
-  function collectCopyrightPayment() external payable{
-  	//TODO
+  function copyrightPayment() external payable{
+    uint256 _each = msg.value / MAX_OWNERSHIP_VALUE;
+    //pay each owner
+    for (uint tokenId; tokenId < MAX_OWNERSHIP_VALUE; tokenId++){
+      require(payable(ownerOf(tokenId)).send(_each));
+    }
   }
 
    /**
@@ -81,6 +86,9 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
     }
   }
 
+  /**
+   * Computes the sum of ancestor ownership
+   */
   function getAncestorEquity(address[] memory  _ancestors) private view returns(uint16){
     uint16 ancestorEquity = 0;
     for (uint16 i = 0; i< ancestorCount;i++){

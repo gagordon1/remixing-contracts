@@ -31,15 +31,10 @@ interface ISidechain is IERC721Enumerable{
 
 
 	/**
-	 * Given an owner, returns their number of shares in the copyright payments
-	 * for the work. (out of 1000)
+	 * When money is to be collected on copyright payment, send value evenly
+	 * to the owners of tokens with ids in range [0-MAX_OWNERSHIP_VALUE)
 	 */
-	function getCopyrightOwnership(address owner) external view returns (uint16);
+	function copyrightPayment() external payable;
 
-	/**
-	 * When money is to be collected on copyright payment,
-	 * split incoming funds according to ownership of the contract's tokens.
-	 */
-	function collectCopyrightPayment() external payable;
 
 }

@@ -7,6 +7,8 @@ const { expect } = require("chai");
 const w3 = require("web3")
 const { toBN } = w3.utils;
 var assert = require('assert');
+const { ethers } = require("hardhat");
+const { default: Web3 } = require("web3");
 
 /**
 * Gets the lineage for a Sidechain leaf (walks up until roots)
@@ -142,6 +144,25 @@ describe.only("SidechainERC721", async (accounts) => {
     assert.equal(await testTree1[6].balanceOf(creators[3]), 10, "Incorrect ownership.")
     assert.equal(await testTree1[6].balanceOf(creators[2]), 30, "Incorrect ownership.")
     assert.equal(await testTree1[6].balanceOf(creators[0]), 20, "Incorrect ownership.")
+
+  }).timeout(100000);
+
+  /**
+   * Constructs the contract asserting that:
+   *    - Allocation of ownership is done correctly upon construction.
+   * */
+   it("sends copyright payments correctly", async () =>{
+    const { Sidechain, creators } = await loadFixture(deployTokenFixture)
+
+    testTree1 = await getTestTree1(Sidechain, creators)
+
+    node2 = testTree1[2]
+
+    ancestor1BalanceBefore = testTree1[0].getCreator()
+    ancestor2BalanceBefore = testTree1[1].getCreator()
+
+
+    node2.copyrightPayment({value : "1000000000000000000"}) //1 ETH
 
   }).timeout(100000);
 
