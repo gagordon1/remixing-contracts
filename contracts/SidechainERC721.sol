@@ -32,7 +32,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
     loadAncestors(ancestors, _parents);
 
     //check for sufficient equity to mint ownership tokens.
-    require(getAncestorEquity(ancestors) + _REV <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
+    require(getAncestorEquity(ancestors) <= MAX_OWNERSHIP_VALUE, "Not enough equity remaining to mint.");
     
     //mint tokens to all ancestors
     uint256 supply;
